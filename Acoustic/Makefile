@@ -5,8 +5,8 @@ TARGET = Acoustic
 CPP_SOURCES = Acoustic.cpp
 
 # Library Locations
-LIBDAISY_DIR = ../../../libdaisy
-DAISYSP_DIR = ../../../DaisySP
+LIBDAISY_DIR = ../../../../lib/libdaisy
+DAISYSP_DIR = ../../../../lib/DaisySP
 
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
