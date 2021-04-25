@@ -35,6 +35,10 @@ float Level::ProcessBlock(float *in, size_t blocksize) {
     }
 
     buffer_[buffer_idx_] = in_max;
+    buffer_idx_++;
+    if (buffer_idx_ >= buffer_size_) {
+        buffer_idx_ = 0;
+    }
 
     float sig_max = -1.0f;
     for (int j = 0; j < buffer_size_; j++) {
@@ -55,6 +59,9 @@ float Level::ProcessBlock(float *in, size_t blocksize) {
 float Level::ProcessBlockMax(float in) {
     buffer_[buffer_idx_] = fabs(in);
     buffer_idx_++;
+    if (buffer_idx_ >= buffer_size_) {
+        buffer_idx_ = 0;
+    }
 
     float sig_max = -1.0f;
     float tmp;
