@@ -1,6 +1,6 @@
 #include "daisy_petal.h"
 #include "daisysp.h"
-// #include "swell.h"
+#include "level.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -15,6 +15,7 @@ float ssend;
 bool bypass_autoswell, bypass_verb, gate;
 ReverbSc verb;
 Adsr autoswell_env;
+Level vol_meter;
 
 // This runs at a fixed rate, to prepare audio samples
 void callback(float *in, float *out, size_t size)
@@ -60,20 +61,17 @@ void callback(float *in, float *out, size_t size)
         }
     }
 
-    buffer[buffer_idx] = sig_max;
-    float tmp;
-    for (int i = 0; i < 25; i++) {
-        tmp = buffer[i];
-        if (tmp > sig_max) {
-            sig_max = tmp;
-        }
-    }
-    sig_max = 20.f * fastlog10f(sig_max); 
-    if (sig_max > thresh) {
-        gate = true;
-    } else {
-        gate = false;
-    }
+    // buffer[buffer_idx] = sig_max;
+    // float tmp;
+    // for (int i = 0; i < 25; i++) {
+    //     tmp = buffer[i];
+    //     if (tmp > sig_max) {
+    //         sig_max = tmp;
+    //     }
+    // }
+    // sig_max = 20.f * fastlog10f(sig_max); 
+    sig_max = vol_meter.ProcessBlockMax(sig_max);
+    gate = sig_max >= thresh;
 }
 
 int main(void)
@@ -103,7 +101,9 @@ int main(void)
     autoswell_env.SetTime(ADSR_SEG_ATTACK, vattack.Process());
     autoswell_env.SetTime(ADSR_SEG_DECAY, 0.0);
     autoswell_env.SetTime(ADSR_SEG_RELEASE, 0.01);
-    autoswell_env.SetSustainLevel(1.0f);
+    autoswell_env.SetSustainLevel(1.0f);\
+
+    vol_meter.Init(samplerate, hw.AudioBlockSize());
 
     hw.StartAdc();
     hw.StartAudio(callback);

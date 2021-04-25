@@ -2,7 +2,7 @@
 TARGET = Acoustic
 
 # Sources
-CPP_SOURCES = Acoustic.cpp
+CPP_SOURCES = Acoustic.cpp Level.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../../../../lib/libdaisy
