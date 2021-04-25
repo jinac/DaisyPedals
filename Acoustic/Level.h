@@ -28,7 +28,8 @@ class Level {
     // std::vector<float> buffer_;
     float sample_rate_;
     size_t block_size_;
-    int buffer_size_, buffer_idx_, time_window_ms_;
+    int buffer_size_, buffer_idx_;
+    static const int time_window_ms_ = 400; // Momentary Loudness defined as 400 ms.
 
     void RecalculateBufferSize();
 

@@ -7,7 +7,6 @@ using namespace daisysp;
 void Level::Init(float samplerate, size_t blocksize) {
     sample_rate_ = samplerate;
     block_size_ = blocksize;
-    time_window_ms_ = 400;
     RecalculateBufferSize();
 }
 
