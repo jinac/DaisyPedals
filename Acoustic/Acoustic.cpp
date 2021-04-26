@@ -101,7 +101,7 @@ int main(void)
     autoswell_env.SetTime(ADSR_SEG_ATTACK, vattack.Process());
     autoswell_env.SetTime(ADSR_SEG_DECAY, 0.0);
     autoswell_env.SetTime(ADSR_SEG_RELEASE, 0.01);
-    autoswell_env.SetSustainLevel(1.0f);\
+    autoswell_env.SetSustainLevel(1.0f);
 
     vol_meter.Init(samplerate, hw.AudioBlockSize());
 
