@@ -19,7 +19,7 @@ Parameter volume;
 // static constexpr size_t kBufferSize = 512;
 
 float flt_buffer[1024];
-float coeff_arr[1024] = {0};
+float coeff_arr[1024];
 
 float samplerate;
 bool bypass;
@@ -84,6 +84,7 @@ void LoadIRFromWavFile(const WavInfo *file_info) {
     int temp;
     unsigned char bytes[3];
     size_t bytesread;
+    float sum = 0;
     for (int i = 0; i < (int)num_samples; i++) {
         temp = 0;
         // switch (bits_per_sample) {
@@ -113,9 +114,16 @@ void LoadIRFromWavFile(const WavInfo *file_info) {
         temp = bytes[2] << 16 | bytes[1] << 8 | bytes[0];
         if (temp & 0x800000) //  if the 24th bit is set, this is a negative number in 24-bit world
             temp = temp | ~0xFFFFFF; // so make sure sign is extended to the 32 bit float
-        coeff_arr[i] = (float) temp / 8388608.;
+        coeff_arr[i] = (float) temp / 8388608.0f;
+        sum += coeff_arr[i] * coeff_arr[i];
         // coeff_arr[i] = s242f(temp);
     }
+
+    float autoGain = DSY_MIN(1.0f, 1.0f / fastroot(sum, 2));
+    for (int j = 0; j < (int)num_samples; j++) {
+        coeff_arr[j] = autoGain * coeff_arr[j];
+    }
+
     flt.SetStateBuffer(flt_buffer, num_samples + 1);
     flt.SetIR(coeff_arr, num_samples, false);
     flt.Reset();
