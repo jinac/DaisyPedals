@@ -58,7 +58,7 @@ void LoadIRFromWavFile(const WavInfo *file_info) {
     size_t data_size = file_info->raw_data.SubCHunk2Size;
     size_t num_samples = data_size / bits_per_sample;
     int byte_chunk_size = bits_per_sample / 8;
-    int wav_sample_rate = file_info->raw_data.SampleRate;
+    // int wav_sample_rate = file_info->raw_data.SampleRate;
 
  
     // if (wav_sample_rate - samplerate < 1.0f) {
@@ -167,6 +167,7 @@ int main(void) {
     dsy_fatfs_init();
     f_mount(&SDFatFS, SDPath, 1);
     LoadIR();
+    f_mount(0, "", 0);
 
     // Initialize knobs.
     volume.Init(hw.knob[hw.KNOB_3], 0.0f, 1.0f, Parameter::LINEAR);
