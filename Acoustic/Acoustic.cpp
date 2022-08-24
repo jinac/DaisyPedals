@@ -18,7 +18,7 @@ Adsr autoswell_env;
 Level vol_meter;
 
 // This runs at a fixed rate, to prepare audio samples
-void callback(float *in, float *out, size_t size)
+void callback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
     float dryl, dryr, wetl, wetr, sendl, sendr, sig_abs, sig_max, thresh;
     hw.ProcessDigitalControls();
@@ -41,21 +41,21 @@ void callback(float *in, float *out, size_t size)
     if (!bypass_autoswell)
         ssend = autoswell_env.Process(gate);
 
-    for(size_t i = 0; i < size; i += 2) {
-        dryl  = ssend * in[i];
-        dryr  = ssend * in[i + 1];
+    for(size_t i = 0; i < size; i++) {
+        dryl  = ssend * in[0][i];
+        dryr  = ssend * in[1][i];
         sendl = dryl * vsend.Value();
         sendr = dryr * vsend.Value();
         verb.Process(sendl, sendr, &wetl, &wetr);
         if(bypass_verb) {
-            out[i]     = dryl;     // left
-            out[i + 1] = dryr; // right
+            out[0][i]     = dryl;     // left
+            out[1][i] = dryr; // right
         }
         else {
-            out[i]     = dryl + wetl;
-            out[i + 1] = dryr + wetr;
+            out[0][i]     = dryl + wetl;
+            out[1][i] = dryr + wetr;
         }
-        sig_abs = fabs(in[i]);
+        sig_abs = fabs(in[0][i]);
         if (sig_abs > sig_max) {
             sig_max = sig_abs;
         }
