@@ -11,7 +11,7 @@ DaisyPetal hw;
 Parameter vtime, vfreq, vsend, vattack, vsens, vol;
 float buffer[25];
 int buffer_idx;
-float ssend;
+float drysend, wetsend;
 bool bypass_autoswell, bypass_verb, gate;
 ReverbSc verb;
 Adsr autoswell_env;
@@ -26,7 +26,6 @@ void callback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t
 
     autoswell_env.SetTime(ADSR_SEG_ATTACK, vattack.Process());
     thresh = vsens.Process();
-    // ssend = vol.Process();
 
     verb.SetFeedback(vtime.Process());
     verb.SetLpFreq(vfreq.Process());
@@ -37,22 +36,23 @@ void callback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t
     if(hw.switches[DaisyPetal::SW_2].RisingEdge())
         bypass_verb = !bypass_verb;
 
-    ssend = 1.0f;
+    drysend = 1.0f;
     if (!bypass_autoswell)
-        ssend = autoswell_env.Process(gate);
+        drysend = autoswell_env.Process(gate);
+    wetsend = vsend.Value();
 
     for(size_t i = 0; i < size; i++) {
-        dryl  = ssend * in[0][i];
-        dryr  = ssend * in[1][i];
-        sendl = dryl * vsend.Value();
-        sendr = dryr * vsend.Value();
+        dryl  = drysend * in[0][i];
+        dryr  = drysend * in[1][i];
+        sendl = dryl * wetsend;
+        sendr = dryr * wetsend;
         verb.Process(sendl, sendr, &wetl, &wetr);
         if(bypass_verb) {
-            out[0][i]     = dryl;     // left
+            out[0][i] = dryl; // left
             out[1][i] = dryr; // right
         }
         else {
-            out[0][i]     = dryl + wetl;
+            out[0][i] = dryl + wetl;
             out[1][i] = dryr + wetr;
         }
         sig_abs = fabs(in[0][i]);
@@ -92,7 +92,7 @@ int main(void)
     // verb controls.
     vtime.Init(hw.knob[hw.KNOB_3], 0.6f, 0.999f, Parameter::LOGARITHMIC);
     vfreq.Init(hw.knob[hw.KNOB_4], 500.0f, 20000.0f, Parameter::LOGARITHMIC);
-    vsend.Init(hw.knob[hw.KNOB_5], 0.0f, 1.0f, Parameter::LINEAR);
+    vsend.Init(hw.expression, 0.0f, 1.0f, Parameter::LINEAR);
 
     // Init fx.
     verb.Init(samplerate);
