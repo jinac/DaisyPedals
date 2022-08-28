@@ -20,8 +20,8 @@ Level vol_meter;
 // This runs at a fixed rate, to prepare audio samples
 void callback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
-    float dryl, dryr, wetl, wetr, sendl, sendr, sig_abs, sig_max, thresh;
-    hw.ProcessDigitalControls();
+    float dryl, dryr, wetl, wetr, sendl, sendr, sig_abs, sig_max, thresh, out_vol;
+    hw.ProcessAllControls();
     sig_max = 0.0f;
 
     autoswell_env.SetTime(ADSR_SEG_ATTACK, vattack.Process());
@@ -30,6 +30,7 @@ void callback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t
     verb.SetFeedback(vtime.Process());
     verb.SetLpFreq(vfreq.Process());
     vsend.Process(); // Process Send to use later
+    out_vol = vol.Process();
 
     if(hw.switches[DaisyPetal::SW_1].RisingEdge())
         bypass_autoswell = !bypass_autoswell;
@@ -48,12 +49,12 @@ void callback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t
         sendr = dryr * wetsend;
         verb.Process(sendl, sendr, &wetl, &wetr);
         if(bypass_verb) {
-            out[0][i] = dryl; // left
-            out[1][i] = dryr; // right
+            out[0][i] = out_vol * dryl; // left
+            out[1][i] = out_vol * dryr; // right
         }
         else {
-            out[0][i] = dryl + wetl;
-            out[1][i] = dryr + wetr;
+            out[0][i] = out_vol * (dryl + wetl);
+            out[1][i] = out_vol * (dryr + wetr);
         }
         sig_abs = fabs(in[0][i]);
         if (sig_abs > sig_max) {
@@ -83,7 +84,7 @@ int main(void)
     // autoswell controls.
     vattack.Init(hw.knob[hw.KNOB_1], 0.01f, 0.1f, Parameter::LOGARITHMIC);
     vsens.Init(hw.knob[hw.KNOB_2], -60.0f, 0.0f, Parameter::LINEAR);
-    vol.Init(hw.expression, 0.0f, 1.0f, Parameter::LINEAR);
+    vol.Init(hw.knob[hw.KNOB_6], 0.0f, 1.0f, Parameter::LOGARITHMIC);
     for (size_t i = 0; i < 25; i++) {
         buffer[i] = 0;
     }
@@ -92,7 +93,7 @@ int main(void)
     // verb controls.
     vtime.Init(hw.knob[hw.KNOB_3], 0.6f, 0.999f, Parameter::LOGARITHMIC);
     vfreq.Init(hw.knob[hw.KNOB_4], 500.0f, 20000.0f, Parameter::LOGARITHMIC);
-    vsend.Init(hw.expression, 0.0f, 1.0f, Parameter::LINEAR);
+    vsend.Init(hw.knob[hw.KNOB_5], 0.0f, 1.0f, Parameter::LINEAR);
 
     // Init fx.
     verb.Init(samplerate);
