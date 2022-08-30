@@ -89,7 +89,7 @@ int main(void)
     cvolume.Init(hw.knob[hw.KNOB_1], 0.0f, 1.0f, Parameter::LOGARITHMIC);
     cmix.Init(hw.knob[hw.KNOB_2], 0.0f, 1.0f, Parameter::LINEAR);
     cdamp.Init(hw.knob[hw.KNOB_3], 0.001f, 0.1f, Parameter::LINEAR);
-    crate.Init(hw.knob[hw.KNOB_4], 0.0f, 0.08f, Parameter::LINEAR);
+    crate.Init(hw.knob[hw.KNOB_4], 0.0f, 0.1f, Parameter::LINEAR);
     cdepth.Init(hw.knob[hw.KNOB_5], 0.0f, 1.0f, Parameter::LINEAR);
     clpg.Init(hw.knob[hw.KNOB_6], 0.0f, 5000.0f, Parameter::LOGARITHMIC);
 
@@ -108,6 +108,8 @@ int main(void)
 	hw.StartAdc();
 	hw.StartAudio(AudioCallback);
 	while(1) {
-		// hw.SetFootswitchLed(hw.FOOTSWITCH_LED_1, bypass_fx ? 0.0f : 1.0f);
+		hw.ClearLeds();
+		hw.SetFootswitchLed(hw.FOOTSWITCH_LED_1, bypass_fx ? 0.0f : 1.0f);
+		hw.UpdateLeds();
 	}
 }
