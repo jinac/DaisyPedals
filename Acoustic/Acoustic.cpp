@@ -1,6 +1,6 @@
 #include "daisy_petal.h"
 #include "daisysp.h"
-#include "level.h"
+#include "Level.h"
 
 using namespace daisy;
 using namespace daisysp;

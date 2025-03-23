@@ -1,6 +1,6 @@
 #include "daisy_petal.h"
 #include "daisysp.h"
-#include "kiboost.h"
+#include "KiBoost.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -14,7 +14,7 @@ Parameter level;
 bool bypass_booster, bright_flag, boost_flag;
 
 // This runs at a fixed rate, to prepare audio samples
-void callback(float *in, float *out, size_t size)
+void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
     bool tmp_boost, tmp_bright;
     hw.ProcessDigitalControls();
@@ -36,11 +36,11 @@ void callback(float *in, float *out, size_t size)
 
     for(size_t i = 0; i < size; i += 2) {
         if(bypass_booster) {
-            out[i]     = in[i];     // left
-            out[i + 1] = in[i + 1]; // right
+            out[0][i] = in[0][i];     // left
+            out[1][i] = in[1][i]; // right
         }
         else {
-            out[i] = out[i + 1] = booster.Process(in[i]);
+            out[0][i] = out[1][i] = booster.Process(in[0][i]);
         }
     }
 }
@@ -58,7 +58,7 @@ int main(void)
     booster.Init(samplerate);
 
     hw.StartAdc();
-    hw.StartAudio(callback);
+    hw.StartAudio(AudioCallback);
     while(1)
     {
         // Do Stuff InfInitely Here
